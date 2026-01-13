@@ -1,0 +1,76 @@
+- name: Deploy docker-based web application
+  hosts: web
+  become: true
+
+  vars:
+   repo_url: https://github.com/fhpthh/fhcoffee_v2.git
+   repo_dest: "/opt/app"
+
+  tasks:
+   - name: update apt cache
+     ansible.builtin.apt:
+       update_cache: yes   
+
+   - name: install required packages for docker and git
+     ansible.builtin.apt:
+      name:
+       - git
+       - apt-transport-https
+       - ca-certificates
+       - curl
+       - gnupg
+       - lsb-release
+      state: present
+  
+   - name: add docker's official gpg key
+     ansible.builtin.apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+     
+   - name: add docker repository
+     ansible.builtin.apt_repository:
+      repo: "deb https://download.docker.com/linux/ubuntu jammy stable"
+      state: present
+      filename: docker
+
+   - name: Update apt cache after adding Docker repo
+     ansible.builtin.apt:
+      update_cache: yes
+
+   - name: Install Docker Engine and Docker Compose plugin
+     ansible.builtin.apt:
+      name:
+       - docker-ce
+       - docker-ce-cli
+       - containerd.io
+       - docker-buildx-plugin
+       - docker-compose-plugin
+      state: present
+
+   - name: Add ubuntu user to docker group
+     ansible.builtin.user:
+       name: ubuntu
+       groups: docker
+       append: yes
+
+   - name: Ensure Docker service is running and enabled
+     ansible.builtin.service:
+       name: docker
+       state: started
+       enabled: yes
+
+   - name: Clone or update GitHub repository
+     ansible.builtin.git:
+       repo: "{{ repo_url }}"
+       dest: "{{ repo_dest }}"
+       version: main
+       update: yes
+
+   - name: Deploy application using Docker Compose
+     community.docker.docker_compose_v2:
+      project_src: "{{ repo_dest }}"
+      state: present
+      pull: always
+      build: always
+     ignore_errors: yes
+

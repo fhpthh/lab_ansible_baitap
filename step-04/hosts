@@ -1,0 +1,8 @@
+[gitlab]
+gitlab ansible_host=192.168.126.100 ansible_user=root
+
+[ubuntu]
+gitlab
+
+[linux:children]
+ubuntu

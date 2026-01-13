@@ -1,0 +1,19 @@
+---
+- name: Deploy frontend
+  hosts: web
+  become: true
+  roles:
+    - frontend
+
+- name: Deploy backend
+  hosts: web
+  become: true
+  roles:
+    - backend
+
+- name: Deploy admin
+  hosts: web
+  become: true
+  roles:
+    - admin
+

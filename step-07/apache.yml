@@ -1,0 +1,33 @@
+- hosts: web
+  tasks:
+    - name: Cài đặt Apache web server
+      apt:
+        pkg: apache2
+        state: present
+        update_cache: true
+
+    - name: Đưa file cấu hình virtual host mới
+      copy:
+        src: files/awesome-app
+        dest: /etc/apache2/sites-available/awesome-app.conf
+        mode: 0640
+
+    - name: Kích hoạt virtual host của chúng ta
+      command: a2ensite awesome-app
+
+    - name: Kiểm tra cấu hình Apache
+      command: apache2ctl configtest
+
+    - name: Vô hiệu hóa virtual host mặc định
+      command: a2dissite 000-default
+
+    - name: Vô hiệu hóa virtual host SSL mặc định
+      command: a2dissite default-ssl
+      notify:
+        - restart apache
+
+  handlers:
+    - name: restart apache
+      service:
+        name: apache2
+        state: restarted

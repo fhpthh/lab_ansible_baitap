@@ -1,0 +1,57 @@
+- name: Deploy backend and frontend containers
+  hosts: web
+  become: true
+  vars:
+   network_name: app-network
+  tasks:
+   - name: create network
+     docker_network:
+      name: "{{ network_name }}"
+
+   - name: Run database
+     docker_container:
+      name: db
+      image: mysql:8.0
+      state: started
+      restart_policy: always
+      networks:
+       - name: "{{ network_name }}"
+      env:
+       MYSQL_ROOT_PASSWORD: "12345"   
+       MYSQL_DATABASE: "crudapp"       
+       MYSQL_USER: "crudapp"          
+       MYSQL_PASSWORD: "crudapp"     
+      volumes:
+       - db_data:/var/lib/mysql
+
+   - name: run backend
+     docker_container:
+      name: backend
+      image: huepth/backend:v1
+      state: started
+      restart_policy: always
+      pull: yes
+      networks:
+       - name: "{{ network_name }}"
+      env:
+       SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/crudapp"
+       SPRING_DATASOURCE_USERNAME: "crudapp"
+       SPRING_DATASOURCE_PASSWORD: "crudapp"
+      ports:
+       - "8888:8080"
+  
+   - name: run frontend
+     docker_container:
+      name: frontend
+      image: huepth/frontend:v1
+      state: started
+      restart_policy: always
+      pull: yes
+      networks:
+       - name: "{{ network_name }}"
+      ports: 
+       - "80:80"
+      env:
+       REACT_APP_API_URL: "http://192.168.126.100:8888"
+
+      

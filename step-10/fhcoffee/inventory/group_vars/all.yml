@@ -1,0 +1,6 @@
+ansible_become: true
+docker_project_src: /opt/app
+docker_frontend_port: 3002
+docker_admin_port: 3001
+docker_backend_port: 4000
+
