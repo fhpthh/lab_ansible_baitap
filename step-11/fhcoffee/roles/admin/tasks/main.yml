@@ -1,0 +1,12 @@
+- name: Stop old admin container if exists
+  community.docker.docker_container:
+    name: fh-admin
+    state: absent
+    force_kill: yes
+
+- name: Run admin container using docker-compose v2
+  community.docker.docker_compose_v2:
+    project_src: "{{ docker_project_src }}"
+    state: present
+    
+

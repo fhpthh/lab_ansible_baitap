@@ -1,0 +1,5 @@
+- name: Include HAProxy tasks
+  import_tasks: haproxy.yml
+  tags:
+    - haproxy
+

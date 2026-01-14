@@ -1,0 +1,11 @@
+- name: Stop old backend container if exists
+  community.docker.docker_container:
+    name: fh-backend
+    state: absent
+    force_kill: yes
+
+- name: Run backend container using docker-compose v2
+  community.docker.docker_compose_v2:
+    project_src: "{{ docker_project_src }}"
+    state: present
+
